@@ -7,12 +7,34 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
+# --- LoRa bridge ---
+find_package(ament_cmake_python REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(std_msgs REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/RoverTelemetry.msg"
+  DEPENDENCIES std_msgs
+)
+
+# Shared protocol/simulation code, importable as `lora_bridge`.
+ament_python_install_package(lora_bridge)
+
+# Node entry points, installed without the .py so `ros2 run` reads naturally.
+install(PROGRAMS lora_bridge/lora_receiver_node.py
+  DESTINATION lib/${PROJECT_NAME} RENAME lora_receiver)
+install(PROGRAMS lora_bridge/fake_rover_tx.py
+  DESTINATION lib/${PROJECT_NAME} RENAME fake_rover_tx)
+install(PROGRAMS lora_bridge/sim_rover_tx_node.py
+  DESTINATION lib/${PROJECT_NAME} RENAME sim_rover_tx)
+
 install(
-  DIRECTORY launch urdf config worlds rviz
+  DIRECTORY launch urdf config worlds rviz firmware
   DESTINATION share/${PROJECT_NAME}
 )
 
@@ -26,6 +48,15 @@ if(BUILD_TESTING)
   # a copyright and license is added to all source files
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
+
+  # LoRa protocol tests: pure python, no hardware or ROS graph needed.
+  find_package(ament_cmake_pytest REQUIRED)
+  ament_add_pytest_test(test_lora_protocol test/test_lora_protocol.py)
+  # Checks the ESP32 firmware and the base station encode identical bytes.
+  # Skips itself if no C compiler is installed.
+  ament_add_pytest_test(test_firmware_parity test/test_firmware_parity.py)
+  # Needs rclpy, so it skips itself outside a sourced ROS 2 environment.
+  ament_add_pytest_test(test_sim_rover_tx test/test_sim_rover_tx.py)
 endif()
 
 ament_package()

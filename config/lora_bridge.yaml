@@ -1,0 +1,41 @@
+# Base-station LoRa receiver parameters.
+#
+# Launch-file arguments override the values set here, e.g.
+#   ros2 launch diff_drive_robot lora.launch.py fake:=true
+
+lora_receiver:
+  ros__parameters:
+    # --- local UART to the base-station LoRa module ---
+    # Ebyte E22/E32 modules default to 9600 8N1. Reyax RYLR998 defaults to
+    # 115200. Match whatever the module is configured for; this rate is the
+    # local wire only and is unrelated to the over-the-air data rate.
+    port: /dev/ttyUSB0
+    baudrate: 9600
+
+    # Generate telemetry internally and never touch the serial port. Lets the
+    # whole decode/publish path be tested with no ESP32 and no radio.
+    fake: false
+    fake_telemetry_rate: 2.0
+
+    # How often the serial buffer is drained. 50 Hz is far above the packet
+    # rate any LoRa link can sustain, so frames are never left sitting.
+    poll_rate: 50.0
+
+    # Frame the telemetry is reported in. This is the rover's own odometry
+    # frame and is intentionally not connected to the base station's TF tree:
+    # the node publishes no transforms.
+    frame_id: odom
+    child_frame_id: lora_rover
+
+    # Republish pose/velocity as nav_msgs/Odometry on /lora/odom for RViz.
+    # Monitoring only - covariances are zero, do not feed this to the EKF.
+    publish_odometry: true
+
+    # Seconds without a valid frame before /lora/link_ok goes false. LoRa at
+    # low data rates is slow and lossy, so keep this well above the packet
+    # period to avoid flapping.
+    link_timeout: 5.0
+
+    # How often to retry opening the serial port when it is missing, so an
+    # unplugged USB-TTL adapter recovers on its own.
+    reconnect_period: 2.0

@@ -30,6 +30,8 @@ install(PROGRAMS lora_bridge/lora_receiver_node.py
   DESTINATION lib/${PROJECT_NAME} RENAME lora_receiver)
 install(PROGRAMS lora_bridge/fake_rover_tx.py
   DESTINATION lib/${PROJECT_NAME} RENAME fake_rover_tx)
+install(PROGRAMS lora_bridge/sim_rover_tx_node.py
+  DESTINATION lib/${PROJECT_NAME} RENAME sim_rover_tx)
 
 install(
   DIRECTORY launch urdf config worlds rviz firmware
@@ -53,6 +55,8 @@ if(BUILD_TESTING)
   # Checks the ESP32 firmware and the base station encode identical bytes.
   # Skips itself if no C compiler is installed.
   ament_add_pytest_test(test_firmware_parity test/test_firmware_parity.py)
+  # Needs rclpy, so it skips itself outside a sourced ROS 2 environment.
+  ament_add_pytest_test(test_sim_rover_tx test/test_sim_rover_tx.py)
 endif()
 
 ament_package()

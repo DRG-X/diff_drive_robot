@@ -184,6 +184,11 @@ in transparent mode: bytes into one module's UART come out of the other's.
 
 ## Test
 
+To drive the Gazebo robot and watch its pose arrive over the link, see
+**[lora_simulation_testing.md](lora_simulation_testing.md)**. It also covers
+simulating a lossy link, verifying the EKF and SLAM are unaffected, and
+hardware bring-up order.
+
 ```bash
 colcon test --packages-select diff_drive_robot
 colcon test-result --verbose

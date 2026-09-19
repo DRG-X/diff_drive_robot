@@ -182,9 +182,14 @@ With a real radio:
 ros2 launch diff_drive_robot lora.launch.py port:=/dev/ttyUSB0 baudrate:=9600
 ```
 
+To drive the simulated robot with teleop and watch its pose travel over the
+LoRa path, see **[docs/lora_simulation_testing.md](docs/lora_simulation_testing.md)**.
+
 Requires `python3-serial`, and `rclpy` for your distro (e.g.
 `ros-lyrical-rclpy`). Wire format, wiring diagram, socat loopback testing and
-ESP32 flashing instructions are in **[docs/lora_bridge.md](docs/lora_bridge.md)**.
+ESP32 flashing instructions are in **[docs/lora_bridge.md](docs/lora_bridge.md)**;
+simulation testing and hardware bring-up steps are in
+**[docs/lora_simulation_testing.md](docs/lora_simulation_testing.md)**.
 
 ## TODO
 

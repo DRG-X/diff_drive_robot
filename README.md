@@ -152,6 +152,40 @@ Once you've mapped your environment, you can save it using the SLAM Toolbox plug
 ros2 run nav2_map_server map_saver_cli -f ~/my_map
 ```
 
+### LoRa Telemetry Bridge
+
+Long-range wireless uplink so the rover can report its pose to a computer far
+outside Wi-Fi range: **ESP32 + LoRa module** on the rover, **LoRa module +
+computer/Raspberry Pi** at the base. UART is only ever a local wire at each
+end; the hop between them is radio.
+
+The bridge is additive and standalone. It publishes only under `/lora`,
+subscribes to nothing and broadcasts no TF, so `/cmd_vel`, the LiDAR, the EKF
+and SLAM Toolbox behave identically whether or not it is running.
+
+| Topic | Type |
+|---|---|
+| `/lora/telemetry` | `diff_drive_robot/msg/RoverTelemetry` |
+| `/lora/odom` | `nav_msgs/msg/Odometry` (for RViz; not for EKF fusion) |
+| `/lora/link_ok` | `std_msgs/msg/Bool` |
+
+Try it with no hardware:
+
+```bash
+ros2 launch diff_drive_robot lora.launch.py fake:=true
+ros2 topic echo /lora/telemetry
+```
+
+With a real radio:
+
+```bash
+ros2 launch diff_drive_robot lora.launch.py port:=/dev/ttyUSB0 baudrate:=9600
+```
+
+Requires `python3-serial`, and `rclpy` for your distro (e.g.
+`ros-lyrical-rclpy`). Wire format, wiring diagram, socat loopback testing and
+ESP32 flashing instructions are in **[docs/lora_bridge.md](docs/lora_bridge.md)**.
+
 ## TODO
 
 Package is still being worked on, though the core functionality is pretty much done, I will be adding some more sensors and functionalities soon.
